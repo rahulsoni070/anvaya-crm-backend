@@ -35,7 +35,7 @@ const leadSchema = new mongoose.Schema(
 
     salesAgent: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "SalesAgent",
+      ref: "User",
       required: true
 },
     source: {
