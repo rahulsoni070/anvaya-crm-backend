@@ -16,59 +16,33 @@ const getLeads = async (req, res) => {
     try {
         const page = Number(req.query.page) || 1;
         const limit = Number(req.query.limit) || 10;
-
         const skip = (page - 1) * limit;
 
-        const filters = { ...req.query };
+        const filters = {};
 
-        if(!filters.status) {
-            delete filters.status;
+        // Status filter
+        if (req.query.status) {
+            filters.status = req.query.status;
         }
 
-        if (!filters.priority) {
-            delete filters.priority;
+        // Priority filter
+        if (req.query.priority) {
+            filters.priority = req.query.priority;
         }
 
-        delete filters.page;
-        delete filters.limit;
-        delete filters.sort;
-        delete filters.search;
-        
-        const search = req.query.search;
+        // Search
+        if (req.query.search) {
+            const search = req.query.search;
 
-        if (search) {
-    filters.$or = [
-        {
-            name: {
-                $regex: search,
-                $options: "i"
-            }
-        },
-        {
-            email: {
-                $regex: search,
-                $options: "i"
-            }
-        },
-        {
-            phone: {
-                $regex: search,
-                $options: "i"
-            }
-        },
-        {
-            status: {
-                $regex: search,
-                $options: "i"
-            }
+            filters.$or = [
+                { name: { $regex: search, $options: "i" } },
+                { email: { $regex: search, $options: "i" } },
+                { phone: { $regex: search, $options: "i" } },
+                { status: { $regex: search, $options: "i" } }
+            ];
         }
-    ];
-}
 
-const totalLeads = await Lead.countDocuments(filters);
-const totalPages = Math.ceil(totalLeads / limit);
-
-        const allowedSortField = [
+        const allowedSortFields = [
             "name",
             "-name",
             "createdAt",
@@ -79,30 +53,35 @@ const totalPages = Math.ceil(totalLeads / limit);
 
         let sort = req.query.sort || "-createdAt";
 
-        if (!allowedSortField.includes(sort)) {
-            sort = "-createdAt"
+        if (!allowedSortFields.includes(sort)) {
+            sort = "-createdAt";
         }
+
+        const totalLeads = await Lead.countDocuments(filters);
+
+        const totalPages = Math.ceil(totalLeads / limit) || 1;
 
         const leads = await Lead.find(filters)
             .populate("salesAgent", "name email")
             .sort(sort)
             .skip(skip)
-            .limit(limit)
-            .collation({ locale: "en", strength: 2 })
-            
+            .limit(limit);
 
         res.status(200).json({
-            leads: leads,
+            leads,
             currentPage: page,
-            totalPages: totalPages,
-            totalLeads: totalLeads
+            totalPages,
+            totalLeads
         });
+
     } catch (error) {
+        console.error("GET LEADS ERROR:", error);
+
         res.status(500).json({
             message: error.message
-        })
+        });
     }
-}
+};
 
 const getLeadById = async (req, res) => {
     try {
