@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const Lead = require("../models/Lead")
 
 const createAgent = async (req, res) => {
     try {
@@ -33,9 +34,18 @@ const getAgent = async (req, res) => {
             role: "salesAgent"
         }).select("-password");
 
+        const leadCounts = await Lead.aggregate([
+            { $group: { _id: "$salesAgent", count: { $sum: 1 } } }
+        ]);
+
+        const countMap = {};
+        leadCounts.forEach((item) => {
+            if (item._id) countMap[item._id.toString()] = item.count;
+        });
+
         const agentsWithLeadCount = salesAgents.map((agent) => ({
             ...agent.toObject(),
-            assignedLeads: 0
+            assignedLeads: countMap[agent._id.toString()] || 0
         }));
 
         res.status(200).json(agentsWithLeadCount);
