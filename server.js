@@ -8,6 +8,7 @@ const salesAgentRoutes = require("./routes/salesAgentRoutes");
 const commentRoutes = require("./routes/commentRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const authRoutes = require("./routes/authRoutes");
+const reportRoutes = require("./routes/reportRoutes")
 
 dotenv.config();
 
@@ -15,6 +16,7 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use("/api/reports", reportRoutes)
 
 // Connect MongoDB
 connectDB();
