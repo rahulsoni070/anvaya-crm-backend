@@ -18,10 +18,8 @@ app.use(cors());
 app.use(express.json());
 app.use("/api/reports", reportRoutes)
 
-// Connect MongoDB
 connectDB();
 
-// Routes
 app.use("/api", leadRoutes);
 app.use("/api", salesAgentRoutes);
 app.use("/api", commentRoutes);
