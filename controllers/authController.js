@@ -1,6 +1,20 @@
+const bcrypt = require("bcrypt");
 const User = require("../models/User");
-const SalesAgent = require("../models/SalesAgent");
-const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken")
+
+
+const getUsers = async (req, res) => {
+    try {
+        const users = await User.find().select("-password");
+
+        res.status(200).json(users);
+
+    } catch (error) {
+        res.status(500).json({
+            message: error.message
+        });
+    }
+};
 
 const registerUser = async (req, res) => {
     try {
@@ -23,16 +37,10 @@ const registerUser = async (req, res) => {
             role
         });
 
-        if (role === "salesAgent") {
-            await SalesAgent.create({
-                name,
-                email,
-                team: "Default"
-            });
-        }
+        user.password = undefined;
 
         res.status(201).json({
-            message: "User created successfully",
+            message: "User registered successfully",
             user
         });
 
@@ -43,6 +51,57 @@ const registerUser = async (req, res) => {
     }
 };
 
+const loginUser = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        const existingUser = await User.findOne({ email });
+
+        if (!existingUser) {
+            return res.status(400).json({
+                message: "Invalid email or password"
+            });
+        }
+
+        const isMatch = await bcrypt.compare(
+            password,
+            existingUser.password
+        );
+
+        if (!isMatch) {
+            return res.status(400).json({
+                message: "Invalid email or password"
+            });
+        }
+
+        existingUser.password = undefined;
+
+        const token = jwt.sign(
+            {
+                id: existingUser._id,
+                role: existingUser.role,
+            },
+            process.env.JWT_SECRET,
+            {
+                expiresIn: "7d"
+            }
+        )
+
+        res.status(200).json({
+            message: "Login successfully",
+            token,
+            user: existingUser
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            message: error.message
+        });
+    }
+};
+
 module.exports = {
-    registerUser
+    registerUser,
+    loginUser,
+    getUsers
 };
