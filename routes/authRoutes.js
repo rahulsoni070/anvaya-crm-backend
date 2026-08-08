@@ -5,9 +5,10 @@ const { registerUser, loginUser, getUsers } = require("../controllers/authContro
 
 const router = express.Router();
 
-router.post("/register", authMiddleware, isAdmin, registerUser);
+router.post("/register", registerUser);
+
 router.post("/login", loginUser);
-router.get("/users", authMiddleware, isAdmin, getUsers
-);
+
+router.get("/users", authMiddleware, isAdmin, getUsers);
 
 module.exports = router;

@@ -20,6 +20,9 @@ const registerUser = async (req, res) => {
     try {
         const { name, email, password, role } = req.body;
 
+        const allowedRoles = ["salesAgent", "admin"];
+        const finalRole = allowedRoles.includes(role) ? role : "salesAgent";
+
         const existingUser = await User.findOne({ email });
 
         if (existingUser) {
@@ -34,7 +37,7 @@ const registerUser = async (req, res) => {
             name,
             email,
             password: hashedPassword,
-            role
+            role: finalRole
         });
 
         user.password = undefined;
