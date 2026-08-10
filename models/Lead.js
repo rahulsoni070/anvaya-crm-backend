@@ -12,7 +12,8 @@ const leadSchema = new mongoose.Schema(
     },
 
     phone: {
-      type: String
+      type: String,
+      match: [/^[0-9]{10}$/, "Phone number must be exactly 10 digits"]
     },
 
     status: {
@@ -37,7 +38,8 @@ const leadSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true
-},
+    },
+
     source: {
       type: String,
       enum: [
@@ -46,6 +48,11 @@ const leadSchema = new mongoose.Schema(
         "Instagram",
         "Referral"
       ]
+    },
+
+    tags: {
+      type: [String],
+      default: []
     }
   },
   {

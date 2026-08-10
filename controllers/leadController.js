@@ -106,7 +106,8 @@ const updateLead = async (req, res) => {
     try {
         const lead = await Lead.findByIdAndUpdate(req.params.id, req.body,
             {
-                new: true
+                new: true,
+                runValidators: true
             }
         );
 
@@ -142,7 +143,17 @@ const deleteLead = async (req, res) => {
     }
 }
 
-module.exports = {
-    createLead, getLeads, updateLead, deleteLead, getLeadById
-}
+const getTags = async (req, res) => {
+    try {
+        const tags = await Lead.distinct("tags");
+        res.status(200).json(tags.filter(Boolean));
+    } catch (error) {
+        res.status(500).json({
+            message: error.message
+        });
+    }
+};
 
+module.exports = {
+    createLead, getLeads, updateLead, deleteLead, getLeadById, getTags
+}
