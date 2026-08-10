@@ -8,7 +8,7 @@ const commentSchema = new mongoose.Schema(
         },
         agent: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "SalesAgent",
+            ref: "User",
             required: true
         },
         lead: {
