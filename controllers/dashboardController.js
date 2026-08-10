@@ -16,12 +16,28 @@ const getDashboard = async (req, res) => {
             }
         )
 
+        const qualifiedLeads = await Lead.countDocuments(
+            {
+                status: "Qualified"
+            }
+        )
+
         const highPriorityLeads = await Lead.countDocuments({
             priority: "High"
         });
 
+        const recentLeads = await Lead.find()
+            .sort("-createdAt")
+            .limit(5)
+            .select("name status priority");
+
         res.status(200).json({
-            totalLeads, newLeads, contactedLeads, highPriorityLeads
+            totalLeads,
+            newLeads,
+            contactedLeads,
+            qualifiedLeads,
+            highPriorityLeads,
+            recentLeads
         });
     } catch (error) {
         res.status(500).json({

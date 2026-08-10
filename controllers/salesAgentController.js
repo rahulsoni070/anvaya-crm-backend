@@ -1,5 +1,6 @@
+const bcrypt = require("bcrypt");
 const User = require("../models/User");
-const Lead = require("../models/Lead")
+const Lead = require("../models/Lead");
 
 const createAgent = async (req, res) => {
     try {
@@ -13,12 +14,16 @@ const createAgent = async (req, res) => {
             });
         }
 
+        const hashedPassword = await bcrypt.hash(password, 10);
+
         const salesAgent = await User.create({
             name,
             email,
-            password,
+            password: hashedPassword,
             role: "salesAgent"
         });
+
+        salesAgent.password = undefined;
 
         res.status(201).json(salesAgent);
     } catch (error) {
