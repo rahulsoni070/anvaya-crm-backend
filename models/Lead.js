@@ -53,6 +53,10 @@ const leadSchema = new mongoose.Schema(
     tags: {
       type: [String],
       default: []
+    },
+
+    timeToClose: {
+      type: Number
     }
   },
   {
