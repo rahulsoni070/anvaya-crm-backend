@@ -30,6 +30,23 @@ const getLeads = async (req, res) => {
             filters.priority = req.query.priority;
         }
 
+        // Sales Agent filter
+        if (req.query.salesAgent) {
+            filters.salesAgent = req.query.salesAgent;
+        }
+
+        // Tags filter - matches leads that have ANY of the given tags
+        if (req.query.tags) {
+            const tagList = req.query.tags
+                .split(",")
+                .map((tag) => tag.trim())
+                .filter(Boolean);
+
+            if (tagList.length > 0) {
+                filters.tags = { $in: tagList };
+            }
+        }
+
         // Search
         if (req.query.search) {
             const search = req.query.search;
@@ -48,7 +65,9 @@ const getLeads = async (req, res) => {
             "createdAt",
             "-createdAt",
             "priority",
-            "-priority"
+            "-priority",
+            "timeToClose",
+            "-timeToClose"
         ];
 
         let sort = req.query.sort || "-createdAt";
@@ -106,8 +125,7 @@ const updateLead = async (req, res) => {
     try {
         const lead = await Lead.findByIdAndUpdate(req.params.id, req.body,
             {
-                new: true,
-                runValidators: true
+                new: true
             }
         );
 
@@ -143,17 +161,6 @@ const deleteLead = async (req, res) => {
     }
 }
 
-const getTags = async (req, res) => {
-    try {
-        const tags = await Lead.distinct("tags");
-        res.status(200).json(tags.filter(Boolean));
-    } catch (error) {
-        res.status(500).json({
-            message: error.message
-        });
-    }
-};
-
 module.exports = {
-    createLead, getLeads, updateLead, deleteLead, getLeadById, getTags
+    createLead, getLeads, updateLead, deleteLead, getLeadById
 }
