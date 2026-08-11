@@ -161,6 +161,18 @@ const deleteLead = async (req, res) => {
     }
 }
 
+const getTags = async (req, res) => {
+    try {
+        const tags = await Lead.distinct("tags");
+
+        res.status(200).json(tags.filter(Boolean));
+    } catch (error) {
+        res.status(500).json({
+            message: error.message
+        })
+    }
+}
+
 module.exports = {
-    createLead, getLeads, updateLead, deleteLead, getLeadById
+    createLead, getLeads, updateLead, deleteLead, getLeadById, getTags
 }
